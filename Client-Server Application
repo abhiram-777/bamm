@@ -1,0 +1,72 @@
+tcp_server.py
+
+
+import socket
+import threading
+
+def handle_client(client_socket):
+    while True:
+        try:
+            data = client_socket.recv(1024).decode('utf-8')
+            if not data or data.lower() == "exit":
+                print("Client disconnected.")
+                break
+            print("Received from client:", data)
+            
+            response = input("Enter your response (type 'exit' to end): ")
+            client_socket.send(response.encode('utf-8'))
+            if response.lower() == "exit":
+                break
+        except:
+            print("Error occurred. Closing connection.")
+            break
+    client_socket.close()
+
+def start_server():
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind(('127.0.0.1', 8000))
+    server.listen(5)
+    print("Server listening on port 8000...")
+    while True:
+        client_socket, addr = server.accept()
+        print("Connection established with", addr)
+        client_handler = threading.Thread(target=handle_client, args=(client_socket,))
+        client_handler.start()
+
+if __name__ == "__main__":
+    start_server()
+
+
+tcp_client.py
+
+
+import socket
+
+def start_client():
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        client.connect(('127.0.0.1', 8000))
+        print("Connected to server!")
+    except:
+        print("Connection failed. Make sure server is running.")
+        return
+
+    while True:
+        try:
+            message = input("You: ")
+            client.send(message.encode('utf-8'))
+            if message.lower() == "exit":
+                print("Disconnected from server.")
+                break
+            response = client.recv(1024).decode('utf-8')
+            if not response or response.lower() == "exit":
+                print("Server closed the connection.")
+                break
+            print("Server:", response)
+        except:
+            print("Error occurred. Connection closed.")
+            break
+    client.close()
+
+if __name__ == "__main__":
+    start_client()
