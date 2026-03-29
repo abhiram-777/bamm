@@ -1,0 +1,25 @@
+import socket
+import ssl
+
+def check_web_server(host, port=443):
+    try:
+        context = ssl.create_default_context()
+        client = socket.create_connection((host, port), timeout=3)
+        secure_client = context.wrap_socket(client, server_hostname=host)
+        
+        print(f"Connecting to {host} on port {port}...")
+        request = f"GET / HTTP/1.1\r\nHost: {host}\r\n\r\n"
+        secure_client.send(request.encode())
+        
+        response = secure_client.recv(4096).decode()
+        print("\n✅ Server is UP and responding!")
+        print("----- Response -----")
+        print(response[:500])
+        secure_client.close()
+    except Exception as e:
+        print("\n❌ Server is DOWN or not responding.")
+        print("Error:", e)
+
+if __name__ == "__main__":
+    host = input("Enter website (e.g., google.com): ")
+    check_web_server(host)
