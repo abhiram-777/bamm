@@ -1,0 +1,69 @@
+server.py two way
+import socket
+
+HOST = "127.0.0.1"
+PORT = 5000
+
+# create TCP socket
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+# bind socket
+server_socket.bind((HOST, PORT))
+
+# start listening
+server_socket.listen(1)
+
+print("Server waiting for connection...")
+
+# accept client
+client_socket, client_address = server_socket.accept()
+
+print("Connected to", client_address)
+
+# continuous chat loop
+while True:
+
+    # receive message from client
+    client_message = client_socket.recv(1024).decode()
+
+    print("Client:", client_message)
+
+    # type server reply
+    message = input("Server: ")
+
+    # send reply to client
+    client_socket.send(message.encode())
+
+# close connection
+client_socket.close()
+server_socket.close()
+
+client.py
+
+import socket
+
+HOST = "127.0.0.1"
+PORT = 5000
+
+# create TCP client socket
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+# connect to server
+client_socket.connect((HOST, PORT))
+
+# continuous chat loop
+while True:
+
+    # type message
+    message = input("Client: ")
+
+    # send message
+    client_socket.send(message.encode())
+
+    # receive reply from server
+    server_reply = client_socket.recv(1024).decode()
+
+    print("Server:", server_reply)
+
+# close socket
+client_socket.close()
